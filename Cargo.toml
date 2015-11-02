@@ -1,0 +1,13 @@
+[package]
+name = "sqlite-rs"
+version = "0.1.0"
+authors = ["Jan Jansen <farodin91@googlemail.com>"]
+build = "build.rs"
+
+[build-dependencies]
+gcc = "0.3"
+
+
+[main]
+name = "sqlite-rs"
+path = "src/main.rs"
