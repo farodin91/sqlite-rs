@@ -1,5 +1,7 @@
 extern crate libc;
 
+use std::ptr;
+use std::ffi::{CString};
 use libc::{c_int, c_uchar, c_char, uint8_t, uint32_t, int32_t};
 
 #[repr(C)]
@@ -17,8 +19,8 @@ extern {
     fn sqlite4_env_size() -> i32;
 
     fn sqlite4_libversion_number() -> i32;
-    fn sqlite4_libversion() -> &str;
-    fn sqlite4_sourceid() -> &str;
+    fn sqlite4_libversion() -> CString;
+    fn sqlite4_sourceid() -> CString;
 
     fn sqlite4_compileoption_used(zOptName: &str) -> i32;
     fn sqlite4_compileoption_get(N: i32) -> &str;
@@ -26,13 +28,13 @@ extern {
     fn sqlite4_initialize(pEnv: *mut Sqlite4Env) -> i32;
     fn sqlite4_shutdown(pEnv: *mut Sqlite4Env) -> i32;
 
-    fn sqlite4_complete(sql: &str) -> i32;
+    fn sqlite4_complete(sql: CString) -> i32;
     fn sqlite4_limit(handle: *mut Sqlite4, id: i32, newVal: i32) -> i32;
 
     fn sqlite4_errcode(handle: *mut Sqlite4) -> i32;
     fn sqlite4_errmsg(handle: *mut Sqlite4) -> i32;
 
-    fn sqlite4_open(pEnv: *mut Sqlite4Env, filename: &str, handle: *mut Sqlite4) -> i32;
+    fn sqlite4_open(pEnv: *mut Sqlite4Env, filename: CString, handle: *mut Sqlite4) -> i32;
     fn sqlite4_env_default() -> *mut Sqlite4Env;
 }
 
@@ -42,7 +44,7 @@ pub fn db_close() -> i32{
     }
 }
 
-pub fn db_open(pEnv: *mut Sqlite4Env, filename: &str, handle: *mut Sqlite4) -> i32{
+pub fn db_open(pEnv: *mut Sqlite4Env, filename: CString, handle: *mut Sqlite4) -> i32{
     unsafe {
         sqlite4_open(pEnv, filename, handle)
     }
@@ -51,8 +53,10 @@ pub fn db_open(pEnv: *mut Sqlite4Env, filename: &str, handle: *mut Sqlite4) -> i
 fn main() {
     //let mut rust_object = Sqlite4 {};
     let env = unsafe{ sqlite4_env_default() };
-    let mut sqlite: *mut Sqlite4;//?
-    let i = db_open(env, "test.db", sqlite);
+    let mut sqlite: *mut Sqlite4 = ptr::null_mut();
+
+    let db_name = CString::new("test.db").unwrap();
+    let i = db_open(env, db_name, sqlite);
     let version =  unsafe{sqlite4_libversion_number()};
     println!("status {:?}",version);
 }
